@@ -100,8 +100,7 @@ exports.getSettings = (req, res) => {
 
 exports.updateSettings = (req, res) => {
   res.json({ message: 'Settings updated' });
-  
-
+};
 
 // List all trending videos
 exports.getTrending = async (req, res) => {
