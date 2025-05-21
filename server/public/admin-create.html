@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Content – Snap News</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Navbar -->
+  <div id="navbar-placeholder"></div>
+
+  <!-- Main Content -->
+  <div class="max-w-2xl mx-auto mt-10 bg-white p-6 rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">Create New Content</h2>
+    <form id="createForm" class="space-y-4">
+      <input type="text" id="title" placeholder="Title" required class="w-full px-3 py-2 border rounded" />
+      <input type="url" id="videoUrl" placeholder="Video URL" required class="w-full px-3 py-2 border rounded" />
+      <div id="videoPreview" class="mt-4"></div>
+      <select id="type" required class="w-full px-3 py-2 border rounded">
+        <option value="">Select Type</option>
+        <option value="news">News</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="sports">Sports</option>
+        <option value="other">Other</option>
+      </select>
+      <textarea id="description" placeholder="Description (optional)" class="w-full px-3 py-2 border rounded"></textarea>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Create</button>
+    </form>
+    <p id="message" class="mt-4 text-sm text-green-600"></p>
+  </div>
+
+  <script>
+    const videoUrlInput = document.getElementById('videoUrl');
+const videoPreview = document.getElementById('videoPreview');
+
+videoUrlInput.addEventListener('input', () => {
+  const url = videoUrlInput.value;
+  let embed = '';
+
+  // YouTube embed
+  const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^\s&]+)/);
+  if (youtubeMatch) {
+    const videoId = youtubeMatch[1];
+    embed = `<iframe width="100%" height="300" class="rounded" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+  }
+
+  // Fallback preview
+  if (!embed) {
+    embed = `<p class="text-red-600 text-sm">⚠️ Preview not available for this link.</p>`;
+  }
+
+  videoPreview.innerHTML = embed;
+});
+
+    const token = localStorage.getItem('Token');
+
+    // Load shared navbar
+    fetch('admin-navbar.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('navbar-placeholder').innerHTML = html;
+        const current = window.location.pathname.split('/').pop();
+        document.querySelectorAll('.nav-link').forEach(link => {
+          if (link.getAttribute('href') === current) {
+            link.classList.add('font-bold', 'underline');
+          }
+        });
+      });
+
+    // Handle form submission
+    const form = document.getElementById('createForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = {
+        title: document.getElementById('title').value,
+        videoUrl: document.getElementById('videoUrl').value,
+        type: document.getElementById('type').value,
+        description: document.getElementById('description').value,
+        status: 'pending'
+      };
+
+      const res = await fetch('http://localhost:3000/admin/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(content)
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        message.textContent = 'Content created successfully!';
+        form.reset();
+      } else {
+        message.textContent = data.message || 'Failed to create content.';
+        message.classList.replace('text-green-600', 'text-red-500');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard – Snap News</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-start pt-10 px-4">
+  <div class="w-full max-w-3xl bg-white shadow-md rounded-lg p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+      <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+    </div>
+
+    <nav class="bg-gray-800 text-white px-4 py-3 flex justify-between items-center shadow">
+      <div class="font-bold text-lg">Snap News Admin</div>
+      <div class="space-x-4 text-sm">
+        <a href="admin-dashboard.html" class="hover:underline">Dashboard</a>
+        <a href="admin-content.html" class="hover:underline">Content</a>
+        <a href="admin-users.html" class="hover:underline">Users</a>
+        <a href="admin-trending.html" class="hover:underline">Trending</a>
+        <button onclick="logout()" class="bg-red-600 px-2 py-1 rounded hover:bg-red-700">Logout</button>
+      </div>
+    </nav>
+
+    <h2 class="text-lg font-semibold mb-2 mt-4">Site Metrics</h2>
+   <!-- 📊 Dashboard Metric Cards -->
+<div id="metricCards" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6"></div>
+
+  </div>
+
+  <a href="admin-content.html" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4">
+    Manage Pending Content
+  </a>
+
+ <script>
+  const API_BASE = 'https://snap-news-backend.onrender.com';
+  const token = localStorage.getItem('token');
+  const metricCards = document.getElementById('metricCards');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  if (!token) {
+    window.location.href = 'admin-login.html';
+  }
+
+  async function loadDashboard() {
+    try {
+      const res = await fetch(`${API_BASE}/admin/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Unauthorized');
+
+      const metrics = [
+        { label: "Users", value: data.usersCount, emoji: "👥", color: "bg-blue-100 text-blue-800" },
+        { label: "Articles", value: data.articlesCount, emoji: "📰", color: "bg-yellow-100 text-yellow-800" },
+        { label: "Pending", value: data.pendingCount, emoji: "⏳", color: "bg-orange-100 text-orange-800" },
+        { label: "Approved", value: data.approvedCount, emoji: "✅", color: "bg-green-100 text-green-800" },
+      ];
+
+      metricCards.innerHTML = metrics.map(m => `
+        <div class="p-4 rounded-xl shadow ${m.color} flex flex-col items-center justify-center text-center">
+          <div class="text-3xl">${m.emoji}</div>
+          <div class="text-xl font-bold">${m.value}</div>
+          <div class="text-sm">${m.label}</div>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error("❌ Dashboard error:", err);
+      metricCards.innerHTML = `<p class="text-red-500 text-sm">❌ Session expired. Please log in again.</p>`;
+      setTimeout(() => {
+        localStorage.removeItem('token');
+        window.location.href = 'admin-login.html';
+      }, 2000);
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'admin-login.html';
+  }
+
+  logoutBtn.addEventListener('click', logout);
+  document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
