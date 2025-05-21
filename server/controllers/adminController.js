@@ -2,6 +2,7 @@ const Content = require('../../models/Content'); // ✅ correct
 
 const { signToken } = require('../utils/jwt');
 
+const Trending = require('../../models/Trending');
 // ==================== Login ====================
 exports.login = (req, res) => {
   try {
@@ -100,7 +101,7 @@ exports.getSettings = (req, res) => {
 exports.updateSettings = (req, res) => {
   res.json({ message: 'Settings updated' });
   
-const Trending = require('../../models/Trending');
+
 
 // List all trending videos
 exports.getTrending = async (req, res) => {
