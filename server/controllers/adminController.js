@@ -99,8 +99,8 @@ exports.getSettings = (req, res) => {
 
 exports.updateSettings = (req, res) => {
   res.json({ message: 'Settings updated' });
-};
-const Trending = require('../models/Trending');
+  
+const Trending = require('../../models/Trending');
 
 // List all trending videos
 exports.getTrending = async (req, res) => {
