@@ -1,52 +1,40 @@
 require('dotenv').config();
 console.log("🔑 SESSION_SECRET is:", process.env.SESSION_SECRET);
-const uploadRoute = require('./routes/upload');
-const express    = require('express');
-const mongoose   = require('mongoose');
-const session    = require('express-session');
-const cors       = require('cors');
-const path       = require('path');
 
-// Import controllers and routes
-const adminController    = require('./server/controllers/adminController');
-const adminRoutes        = require('./server/routes/admin');
-const publicRoutes       = require('./server/routes/public');
-const { authenticateAdmin } = require('./server/middleware/auth');
+const express  = require('express');
+const mongoose = require('mongoose');
+const session  = require('express-session');
+const cors     = require('cors');
+const path     = require('path');
+
+// Route imports
+const uploadRoute = require('./routes/upload');
+const adminController = require('./controllers/adminController');
+const adminRoutes   = require('./routes/admin');
+const publicRoutes  = require('./routes/public');
+const { authenticateAdmin } = require('./middleware/auth');
+const { authenticateAdmin } = require('../middleware/auth');
 
 const app = express();
 
-// 🔥 Enable CORS globally for your front-ends
+// Global CORS
 app.use(cors({
   origin: [
-    'https://snap-news.onrender.com',         // your main front-end
-    'https://snapbackend-new.onrender.com',   // the new one in your error
-    'https://snap-news-admin-panel-1234.onrender.com', 
-  
-    'http://localhost:5173'
+    'https://snap-news.onrender.com',
+    'https://snapbackend-new.onrender.com',
+    'http://localhost:3000'
   ],
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: true
 }));
+app.options('*', cors());
 
-app.options('*', cors());  // handle preflight
-
-// Debug origin logging
+// Debug origin
 app.use((req, res, next) => {
   console.log('🔍 Request Origin:', req.headers.origin);
   next();
 });
-// Serve static admin UI from public/
-app.use(express.static(path.join(__dirname, 'public')));
-
-
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch(err => console.error("❌ MongoDB error:", err));
 
 // Body parsers and session
 app.use(express.json());
@@ -57,22 +45,16 @@ app.use(session({
   saveUninitialized: false
 }));
 
-app.use(uploadRoute);
+// Mount routes
+app.use(uploadRoute); // handles GET/POST /upload
+app.post('/admin/login', adminController.login);           // public login
+app.use('/admin', authenticateAdmin, adminRoutes);          // protected admin APIs
+app.use('/public', publicRoutes);                           // public content APIs
 
-// Public (no auth) login route
-app.post('/admin/login', adminController.login);
+// Serve static files for admin UI
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Protected admin API routes
-app.use('/admin', authenticateAdmin, adminRoutes);
-
-// Public content API routes
-app.use('/public', publicRoutes);
-
-// Admin UI pages at root/public
-// Base path for admin UI
-// Admin UI pages base directory
-// Admin UI pages base directory
-// Admin UI pages base directory
+// Admin UI routes
 const ui = path.join(__dirname, 'public');
 app.get(['/', '/dashboard'],   (req, res) => res.sendFile(path.join(ui, 'admin-dashboard.html')));
 app.get('/content',             (req, res) => res.sendFile(path.join(ui, 'admin-content.html')));
@@ -80,11 +62,15 @@ app.get('/analytics',           (req, res) => res.sendFile(path.join(ui, 'admin-
 app.get('/create',              (req, res) => res.sendFile(path.join(ui, 'admin-create.html')));
 app.get('/login',               (req, res) => res.sendFile(path.join(ui, 'admin-login.html')));
 
-// CORS test endpoint
-app.get('/cors-check', (req, res) => {
-  res.json({ message: 'CORS is working ✅' });
-});
+// CORS test
+app.get('/cors-check', (req, res) => res.json({ message: 'CORS OK' }));
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// Mongo & start
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));
+  })
+  .catch(err => console.error('❌ MongoDB error:', err));
+
