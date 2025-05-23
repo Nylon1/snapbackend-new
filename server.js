@@ -1,6 +1,6 @@
 require('dotenv').config();
 console.log("🔑 SESSION_SECRET is:", process.env.SESSION_SECRET);
-const uploadRoute = require('./routes/upload');
+const uploadRoute = require('./server/routes/upload');
 const express    = require('express');
 const mongoose   = require('mongoose');
 const session    = require('express-session');
