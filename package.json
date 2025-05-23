@@ -1,16 +1,18 @@
 {
   "name": "snapnews",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
+    "express-session": "^1.18.1",
     "fluent-ffmpeg": "^2.1.2",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.0.0",
     "multer": "^1.4.4"
   }
