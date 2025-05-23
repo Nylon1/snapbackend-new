@@ -15,20 +15,21 @@ const { authenticateAdmin } = require('./server/middleware/auth');
 
 const app = express();
 
-// 🔥 Enable CORS globally — must be before mounting any routes
+// 🔥 Enable CORS globally for your front-ends
 app.use(cors({
   origin: [
-    'https://snap-news-admin-panel-1234.onrender.com',
+    'https://snap-news.onrender.com',         // your main front-end
+    'https://snapbackend-new.onrender.com',   // the new one in your error
+    'https://snap-news-admin-panel-1234.onrender.com', 
   
-    'http://localhost:5173',
-    'https://snap-news.onrender.com',
-    'https://snapbackend-new.onrender.com'
+    'http://localhost:5173'
   ],
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: true
 }));
-app.options('*', cors());
+
+app.options('*', cors());  // handle preflight
 
 // Debug origin logging
 app.use((req, res, next) => {
