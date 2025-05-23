@@ -15,6 +15,13 @@ const { authenticateAdmin } = require('./server/middleware/auth');
 
 const app = express();
 
+app.use(cors({
+  origin: 'https://snap-news.onrender.com',
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: true
+}));
+
 // Debug origin logging
 app.use((req, res, next) => {
   console.log('🔍 Request Origin:', req.headers.origin);
@@ -26,6 +33,7 @@ const allowedOrigins = [
   'https://snap-news-admin-panel-1234.onrender.com',
   'https://snap-news-backend.onrender.com',
   'http://localhost:5173'
+  'https://snap-news.onrender.com'
 ];
 const corsOptions = {
   origin: function (origin, callback) {
