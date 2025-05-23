@@ -15,11 +15,11 @@ const { authenticateAdmin } = require('./server/middleware/auth');
 
 const app = express();
 
-// 🔥 Enable CORS globally — must come before mounting any routes
+// 🔥 Enable CORS globally — must be before mounting any routes
 app.use(cors({
   origin: [
     'https://snap-news-admin-panel-1234.onrender.com',
-   
+  
     'http://localhost:5173',
     'https://snap-news.onrender.com',
     'https://snapbackend-new.onrender.com'
@@ -36,8 +36,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static admin UI files
-app.use(express.static(path.join(__dirname, 'server', 'public')));
+// Serve static admin UI files from root-level public/
+// Serve static admin UI files from server/public
+// Serve static admin UI files from server/public
+// Serve static admin UI files from server/routes/public
+// Serve static admin UI files from root-level public/
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -65,8 +69,12 @@ app.use('/admin', authenticateAdmin, adminRoutes);
 // Public content API routes
 app.use('/public', publicRoutes);
 
-// Admin UI pages
-const ui = path.join(__dirname, 'server', 'public');
+// Admin UI pages at root/public
+// Base path for admin UI
+// Admin UI pages base directory
+// Admin UI pages base directory
+// Admin UI pages base directory
+const ui = path.join(__dirname, 'public');
 app.get(['/', '/dashboard'],   (req, res) => res.sendFile(path.join(ui, 'admin-dashboard.html')));
 app.get('/content',             (req, res) => res.sendFile(path.join(ui, 'admin-content.html')));
 app.get('/analytics',           (req, res) => res.sendFile(path.join(ui, 'admin-analytics.html')));
@@ -81,5 +89,3 @@ app.get('/cors-check', (req, res) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
-
