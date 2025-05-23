@@ -36,13 +36,9 @@ app.use((req, res, next) => {
   console.log('🔍 Request Origin:', req.headers.origin);
   next();
 });
-
-// Serve static admin UI files from root-level public/
-// Serve static admin UI files from server/public
-// Serve static admin UI files from server/public
-// Serve static admin UI files from server/routes/public
-// Serve static admin UI files from root-level public/
+// Serve static admin UI from public/
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
