@@ -1,6 +1,6 @@
 require('dotenv').config();
 console.log("🔑 SESSION_SECRET is:", process.env.SESSION_SECRET);
-
+const uploadRoute = require('./routes/upload');
 const express    = require('express');
 const mongoose   = require('mongoose');
 const session    = require('express-session');
@@ -60,6 +60,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
+app.use(uploadRoute);
 
 // Public (no auth) login route
 app.post('/admin/login', adminController.login);
