@@ -1,41 +1,49 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const router = express.Router();
+const path    = require('path');
+const fs      = require('fs');
+const router  = express.Router();
 
-const Content = require('../models/Content'); // MongoDB Content model
+const Content = require('../models/Content');
 
-const uploadsPath = path.join(__dirname, '..', 'public', 'uploads');
+// ** point to the real uploads directory **
+const uploadsPath = path.join(__dirname, '..', 'uploads');
 
 router.get('/feed', async (req, res) => {
-  const now = Date.now();
-  const cutoff = new Date(now - 24 * 60 * 60 * 1000); // 24 hours ago
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   try {
-    // 🧹 1. Find and delete expired videos from disk + DB
+    // 1) Clean up expired
     const expiredVideos = await Content.find({ createdAt: { $lt: cutoff } });
-
-    for (const video of expiredVideos) {
-      const filePath = path.join(uploadsPath, path.basename(video.videoUrl));
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      await Content.findByIdAndDelete(video._id);
+    for (let vid of expiredVideos) {
+      // pick whichever field stores the file URL
+      const relPath = vid.videoUrl || vid.filePath;
+      if (relPath) {
+        // strip off any leading slash
+        const filename = path.basename(relPath);
+        const fullPath = path.join(uploadsPath, filename);
+        if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+      }
+      await Content.deleteOne({ _id: vid._id });
     }
 
-    // 📦 2. Fetch approved videos
-    const approvedVideos = await Content.find({ status: 'approved' }).sort({ createdAt: -1 });
+    // 2) Fetch approved
+    const approvedVideos = await Content
+      .find({ status: 'approved' })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // ⏳ 3. Add expiresAt timestamp
-    const enrichedVideos = approvedVideos.map(video => ({
-      ...video.toObject(),
-      expiresAt: new Date(video.createdAt.getTime() + 24 * 60 * 60 * 1000)
+    // 3) Enrich with expiresAt
+    const videos = approvedVideos.map(v => ({
+      ...v,
+      expiresAt: new Date(v.createdAt.getTime() + 24 * 60 * 60 * 1000)
     }));
 
-    // 🎥 4. Render to EJS
-    res.render('feed', { videos: enrichedVideos });
+    // 4) Render feed.ejs
+    return res.render('feed', { videos });
 
   } catch (err) {
-    console.error('❌ Error loading feed:', err.message);
-    res.status(500).send('Server error loading feed.');
+    console.error('❌ Error loading feed:', err);
+    return res.status(500).send('Server error loading feed.');
   }
 });
 
