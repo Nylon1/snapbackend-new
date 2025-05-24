@@ -45,7 +45,7 @@ const upload = multer({
 const Content = require('../models/Content');
 
 // POST /upload
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', upload.any(), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
