@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Trending Content – Snap News</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen px-6 py-10">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Manage Trending Now</h1>
+      <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+    </div>
+
+    <form id="trendingForm" class="bg-white p-6 rounded shadow mb-8">
+      <h2 class="text-lg font-semibold mb-4">Add New Trending Item</h2>
+      <input id="title" type="text" placeholder="Title" required class="w-full mb-2 px-4 py-2 border rounded" />
+      <input id="videoUrl" type="url" placeholder="Video URL" required class="w-full mb-2 px-4 py-2 border rounded" />
+      <textarea id="description" placeholder="Description" rows="3" class="w-full mb-4 px-4 py-2 border rounded"></textarea>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add to Trending</button>
+    </form>
+
+    <div id="trendingList" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <!-- Trending items here -->
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://snap-news-backend.onrender.com';
+    const token = localStorage.getItem('token');
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = 'admin-login.html';
+    }
+
+    document.getElementById('trendingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const videoUrl = document.getElementById('videoUrl').value;
+      const description = document.getElementById('description').value;
+
+      try {
+        await fetch(`${API_BASE}/admin/trending`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ title, videoUrl, description })
+        });
+        loadTrending();
+        e.target.reset();
+      } catch (err) {
+        console.error("❌ Add trending error:", err);
+      }
+    });
+
+    async function loadTrending() {
+      try {
+        const res = await fetch(`${API_BASE}/admin/trending`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        const container = document.getElementById('trendingList');
+        container.innerHTML = '';
+
+        data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'bg-white p-4 rounded shadow';
+          div.innerHTML = `
+            <video src="${item.videoUrl}" controls class="w-full rounded mb-2"></video>
+            <h3 class="text-md font-semibold mb-1">${item.title}</h3>
+            <p class="text-sm text-gray-600 mb-2">${item.description || ''}</p>
+            <button onclick="removeTrending('${item._id}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Remove</button>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        console.error("❌ Load trending error:", err);
+      }
+    }
+
+    async function removeTrending(id) {
+      try {
+        await fetch(`${API_BASE}/admin/trending/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadTrending();
+      } catch (err) {
+        console.error("❌ Delete trending error:", err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadTrending);
+  </script>
+</body>
+</html>
