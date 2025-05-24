@@ -8,7 +8,7 @@ const session  = require('express-session');
 const path     = require('path');
 
 // Route & controller imports
-const uploadRoute     = require('./routes/upload');
+const uploadRoute     = require('../routes/upload');
 const adminController = require('./controllers/adminController');
 const adminRoutes     = require('./routes/admin');
 const publicRoutes    = require('./routes/public');
