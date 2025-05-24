@@ -52,11 +52,6 @@ app.get('/content',      (req, res) => res.sendFile(path.join(ui, 'admin-content
 app.get('/analytics',    (req, res) => res.sendFile(path.join(ui, 'admin-analytics.html')));
 app.get('/create',       (req, res) => res.sendFile(path.join(ui, 'admin-create.html')));
 app.get('/login',        (req, res) => res.sendFile(path.join(ui, 'admin-login.html')));
-// Expose all registered routes at GET /routes
-const listEndpoints = require('express-list-endpoints');
-app.get('/routes', (req, res) => {
-  res.json(listEndpoints(app));
-});
 
 // Start the server after DB connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -77,6 +72,10 @@ mongoose.connect(process.env.MONGO_URI, {
       });
     res.json(routes);
   });
+
+  // Now start listening
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+}).catch(err => console.error('❌ MongoDB error:', err));
 
   // Now start listening
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
