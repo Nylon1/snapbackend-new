@@ -55,12 +55,15 @@ app.post('/upload', async (req, res) => {
     await file.mv(path.join(uploadDir, filename));
 
     const Content = require('../models/Content');
-    const newContent = new Content({
-      title:     req.body.title || file.name,
-      filePath:  `/uploads/${filename}`,
-      mimeType:  file.mimetype,
-      createdBy: req.user?.id || null
-    });
+  const filePath = `/uploads/${filename}`;
+const newContent = new Content({
+  title:     req.body.title || file.name,
+  filePath,                    // if your UI uses this
+  videoUrl: filePath,          // satisfy the required schema field
+  mimeType:  file.mimetype,
+  createdBy: req.user?.id || null
+});
+
     await newContent.save();
 
     res.status(201).json({ success: true, content: newContent });
