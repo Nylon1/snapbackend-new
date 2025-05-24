@@ -63,6 +63,15 @@ app.get('/routes', (req, res) => {
   res.json(routes);
 });
 
+// DEBUG: log all mounted routes
+console.log('—— MOUNTED ROUTES ——');
+app._router.stack
+  .filter(layer => layer.route)
+  .forEach(layer => {
+    const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase());
+    console.log(methods.join(','), layer.route.path);
+  });
+
 
 // Serve admin UI
 app.use(express.static(path.join(__dirname, 'public')));
