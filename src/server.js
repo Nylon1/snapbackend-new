@@ -87,8 +87,8 @@ app.get('/watch/:filename', require('./routes/watchRoute'));
 
 // 5) Admin and public routes
 const adminController = require('../controllers/adminController');
-const adminRoutes     = require('../routes/admin');
-const publicRoutes    = require('../routes/public');
+const adminRoutes     = require('./routes/admin');
+const publicRoutes    = require('./routes/public');
 const { authenticateAdmin } = require('../middleware/auth');
 
 app.post('/admin/login', adminController.login);
