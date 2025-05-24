@@ -46,10 +46,14 @@ const Content = require('../models/Content');
 
 // POST /upload
 router.post('/', upload.any(), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
+  console.log('Received Multer files:', req.files);
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ success: false, message: 'No file uploaded' });
+  }
+  const file = req.files[0];
+  // existing logic, but use `file` instead of req.file…
+});
+
 
     const newContent = new Content({
       title: req.body.title || req.file.originalname,
