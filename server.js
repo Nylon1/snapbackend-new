@@ -44,9 +44,6 @@ app.get('/health', (req, res) => res.send('OK'));
 // Assuming routes/upload.js exports a router handling ONLY “/” and “/” POST
 app.use('/upload', uploadRoute);
 
-// 3) News‐feed routes (if you have one)
-const feedRoute = require('./routes/feedRoute');
-app.use('/feed', feedRoute);
 
 // 4) Admin login + protected admin routes
 app.post('/admin/login', adminController.login);
