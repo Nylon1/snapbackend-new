@@ -13,6 +13,10 @@ const fileUpload   = require('express-fileupload');
 
 const app = express();
 
+// Configure EJS view engine
+app.set('views', path.join(__dirname, '../views'));
+app.set('view engine', 'ejs');
+
 // Enable file uploads (express-fileupload)
 app.use(fileUpload());
 
@@ -36,6 +40,9 @@ app.use(session({
   saveUninitialized: false
 }));
 
+// Serve static files (public assets)
+app.use(express.static(path.join(__dirname, '../public')));
+
 // 1) Health check
 app.get('/health', (req, res) => res.send('OK'));
 
@@ -51,19 +58,18 @@ app.post('/upload', async (req, res) => {
     const key      = Object.keys(req.files)[0];
     const file     = req.files[key];
     const filename = `${Date.now()}-${file.name}`;
+    const filePath = `/uploads/${filename}`;
 
     await file.mv(path.join(uploadDir, filename));
 
     const Content = require('../models/Content');
-  const filePath = `/uploads/${filename}`;
-const newContent = new Content({
-  title:     req.body.title || file.name,
-  filePath,                    // if your UI uses this
-  videoUrl: filePath,          // satisfy the required schema field
-  mimeType:  file.mimetype,
-  createdBy: req.user?.id || null
-});
-
+    const newContent = new Content({
+      title:     req.body.title || file.name,
+      filePath,
+      videoUrl:  filePath,
+      mimeType:  file.mimetype,
+      createdBy: req.user?.id || null
+    });
     await newContent.save();
 
     res.status(201).json({ success: true, content: newContent });
@@ -73,26 +79,13 @@ const newContent = new Content({
   }
 });
 
-// 3) Feed route — list approved content
-app.get('/feed', async (req, res) => {
-  try {
-    const items = await require('../models/Content')
-      .find({ status: 'approved' })
-      .sort('-createdAt')
-      .lean();
+// 3) Feed route — render feed.ejs with approved videos
+app.get('/feed', require('./routes/feedRoute'));
 
-    // If you want JSON:
-    return res.json({ success: true, items });
+// 4) Watch route — render watch.ejs for individual video
+app.get('/watch/:filename', require('./routes/watchRoute'));
 
-    // Or, if you have a static HTML page:
-    // return res.sendFile(path.join(__dirname, '../public/feed.html'));
-  } catch (err) {
-    console.error('🛑 /feed error:', err);
-    return res.status(500).json({ success: false, message: 'Failed to load feed' });
-  }
-});
-
-// 3) Admin and public routes
+// 5) Admin and public routes
 const adminController = require('../controllers/adminController');
 const adminRoutes     = require('../routes/admin');
 const publicRoutes    = require('../routes/public');
@@ -102,7 +95,7 @@ app.post('/admin/login', adminController.login);
 app.use('/admin', authenticateAdmin, adminRoutes);
 app.use('/public', publicRoutes);
 
-// 4) Debug: list mounted routes
+// 6) Debug: list mounted routes
 app.get('/routes', (req, res) => {
   const routes = app._router.stack
     .filter(layer => layer.route)
@@ -115,15 +108,6 @@ app._router.stack
   .filter(layer => layer.route)
   .forEach(layer => console.log(Object.keys(layer.route.methods).map(m => m.toUpperCase()).join(','), layer.route.path));
 
-// 5) Serve admin UI
-app.use(express.static(path.join(__dirname, '../public')));
-const ui = path.join(__dirname, '../public');
-app.get(['/', '/dashboard'], (req, res) => res.sendFile(path.join(ui, 'admin-dashboard.html')));
-app.get('/content',   (req, res) => res.sendFile(path.join(ui, 'admin-content.html')));
-app.get('/analytics', (req, res) => res.sendFile(path.join(ui, 'admin-analytics.html')));
-app.get('/create',    (req, res) => res.sendFile(path.join(ui, 'admin-create.html')));
-app.get('/login',     (req, res) => res.sendFile(path.join(ui, 'admin-login.html')));
-
 // Start server after DB connect
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -132,4 +116,3 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch(err => console.error('❌ MongoDB error:', err));
-
