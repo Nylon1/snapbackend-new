@@ -45,75 +45,45 @@ app.use(session({
 // 1) Health check
 app.get('/health', (req, res) => res.send('OK'));
 
-// 2) Upload routes
-// Assuming routes/upload.js exports a router handling ONLY “/” and “/” POST
-app.use('/upload', uploadRoute);
+// RIGHT after your health check in src/server.js:
+const fs         = require('fs');
+const path       = require('path');
+const fileUpload = require('express-fileupload');
+const Content    = require('../models/Content');
 
+// enable file uploads
+app.use(fileUpload());
 
-// 4) Admin login + protected admin routes
-app.post('/admin/login', adminController.login);
-app.use('/admin', authenticateAdmin, adminRoutes);
+// ensure uploads dir exists
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// 5) Public content routes
-app.use('/public', publicRoutes);
+// inline POST /upload handler
+app.post('/upload', async (req, res) => {
+  try {
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    // pick the first file under any field name
+    const key      = Object.keys(req.files)[0];
+    const file     = req.files[key];
+    const filename = `${Date.now()}-${file.name}`;
 
-// 6) (Debug) List all mounted routes
-app.get('/routes', (req, res) => {
-  const routes = app._router.stack
-    .filter(layer => layer.route)
-    .map(layer => ({
-      path:    layer.route.path,
-      methods: Object.keys(layer.route.methods).map(m => m.toUpperCase())
-    }));
-  res.json(routes);
+    // move file to disk
+    await file.mv(path.join(uploadDir, filename));
+
+    // save metadata in Mongo
+    const newContent = new Content({
+      title:     req.body.title || file.name,
+      filePath:  `/uploads/${filename}`,
+      mimeType:  file.mimetype,
+      createdBy: req.user?.id || null
+    });
+    await newContent.save();
+
+    return res.status(201).json({ success: true, content: newContent });
+  } catch (err) {
+    console.error('🛑 Upload handler error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
 });
-
-// DEBUG: log all mounted routes
-console.log('—— MOUNTED ROUTES ——');
-app._router.stack
-  .filter(layer => layer.route)
-  .forEach(layer => {
-    const methods = Object.keys(layer.route.methods).map(m => m.toUpperCase());
-    console.log(methods.join(','), layer.route.path);
-  });
-
-
-// Serve admin UI
-app.use(express.static(path.join(__dirname, 'public')));
-const ui = path.join(__dirname, 'public');
-app.get(['/', '/dashboard'], (req, res) => res.sendFile(path.join(ui, 'admin-dashboard.html')));
-app.get('/content',      (req, res) => res.sendFile(path.join(ui, 'admin-content.html')));
-app.get('/analytics',    (req, res) => res.sendFile(path.join(ui, 'admin-analytics.html')));
-app.get('/create',       (req, res) => res.sendFile(path.join(ui, 'admin-create.html')));
-app.get('/login',        (req, res) => res.sendFile(path.join(ui, 'admin-login.html')));
-
-// Start the server after DB connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log('✅ MongoDB connected');
-  const PORT = process.env.PORT || 3000;
-
-  // Expose all registered routes at GET /routes
-  app.get('/routes', (req, res) => {
-    const routes = app._router.stack
-      .filter(layer => layer.route)           // only entries with a route
-      .map(layer => {
-        const methods = Object.keys(layer.route.methods)
-          .map(m => m.toUpperCase());
-        return { path: layer.route.path, methods };
-      });
-    res.json(routes);
-  });
-
-  // Now start listening
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-  });
-})
-.catch(err => {
-  console.error('❌ MongoDB error:', err);
-});
-
