@@ -1,4 +1,6 @@
- const Content = require('../../models/content'); // ✅ correct
+ // controllers/adminController.js
+const Content = require('../models/Content');
+ // ✅ correct
 
 const { signToken } = require('../utils/jwt');
 
