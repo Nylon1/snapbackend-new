@@ -3,6 +3,14 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+
+// Ensure the uploads directory exists at project root
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Ensure the uploads directory exists at project root (e.g., './uploads')
 const uploadDir = path.join(__dirname, '../uploads');
