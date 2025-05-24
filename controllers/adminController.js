@@ -4,7 +4,7 @@ const Content = require('../models/Content');
 
 const { signToken } = require('../utils/jwt');
 
-const Trending = require('../../models/Trending');
+const Trending = require('../models/Trending');
 // ==================== Login ====================
 exports.login = (req, res) => {
   try {
