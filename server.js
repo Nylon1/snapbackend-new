@@ -66,9 +66,22 @@ mongoose.connect(process.env.MONGO_URI, {
   console.log('✅ MongoDB connected');
   const PORT = process.env.PORT || 3000;
 
-  // Your new route is defined, now start listening
+  // Expose all registered routes at GET /routes
+  app.get('/routes', (req, res) => {
+    const routes = app._router.stack
+      .filter(layer => layer.route)           // only entries with a route
+      .map(layer => {
+        const methods = Object.keys(layer.route.methods)
+          .map(m => m.toUpperCase());
+        return { path: layer.route.path, methods };
+      });
+    res.json(routes);
+  });
+
+  // Now start listening
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 }).catch(err => console.error('❌ MongoDB error:', err));
+
 
 
 
