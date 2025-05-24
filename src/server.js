@@ -47,7 +47,7 @@ app.get('/health', (req, res) => res.send('OK'));
 
 // RIGHT after your health check in src/server.js:
 const fs         = require('fs');
-const path       = require('path');
+
 const fileUpload = require('express-fileupload');
 const Content    = require('../models/Content');
 
