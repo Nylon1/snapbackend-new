@@ -25,11 +25,14 @@ app.use(cors({
   origin: [
     'https://snap-news.onrender.com',
     'https://snapbackend-new.onrender.com',
-    'https://snap-news-admin-panel-1234.onrender.com'
+    'https://snap-news-admin-panel-1234.onrender.com', // ← comma added here
     'http://localhost:3000'
   ],
-  credentials: true
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: true        // ← allows cookies/auth headers
 }));
+
 app.options('*', cors());
 
 // Body parsing & sessions
