@@ -73,6 +73,25 @@ const newContent = new Content({
   }
 });
 
+// 3) Feed route — list approved content
++app.get('/feed', async (req, res) => {
++  try {
++    const items = await require('../models/Content')
++      .find({ status: 'approved' })
++      .sort('-createdAt')
++      .lean();
++
++    // If you want JSON:
++    return res.json({ success: true, items });
++
++    // Or, if you have a static HTML page:
++    // return res.sendFile(path.join(__dirname, '../public/feed.html'));
++  } catch (err) {
++    console.error('🛑 /feed error:', err);
++    return res.status(500).json({ success: false, message: 'Failed to load feed' });
++  }
++});
+
 // 3) Admin and public routes
 const adminController = require('../controllers/adminController');
 const adminRoutes     = require('../routes/admin');
