@@ -62,7 +62,7 @@ app.post('/upload', async (req, res) => {
 
     await file.mv(path.join(uploadDir, filename));
 
-    const Content = require('../models/Content');
+    const Content = require('./models/Content');
     const newContent = new Content({
       title:     req.body.title || file.name,
       filePath,
