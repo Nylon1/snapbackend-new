@@ -1,7 +1,6 @@
 // routes/upload.js
 const express = require('express');
 const router  = express.Router();
-const multer  = require('multer');
 const fs      = require('fs');
 const path    = require('path');
 const Content = require('../models/Content');
@@ -10,40 +9,36 @@ const Content = require('../models/Content');
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// Multer storage & filter (you can re-add fileFilter if you like)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename:    (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-});
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
-
-// — Explicitly accept one file under the 'video' field name —
-router.post(
-  '/', 
-  upload.fields([{ name: 'video', maxCount: 1 }]),
-  async (req, res) => {
-    try {
-      const fileArr = req.files.video;
-      if (!fileArr || fileArr.length === 0) {
-        return res.status(400).json({ success: false, message: 'No video file uploaded' });
-      }
-      const file = fileArr[0];
-
-      // Save metadata
-      const newContent = new Content({
-        title:     req.body.title  || file.originalname,
-        filePath:  `/uploads/${file.filename}`,
-        mimeType:  file.mimetype,
-        createdBy: req.user?.id || null
-      });
-      await newContent.save();
-
-      res.status(201).json({ success: true, content: newContent });
-    } catch (err) {
-      console.error('🛑 Upload handler error:', err);
-      res.status(500).json({ success: false, message: err.message });
+// POST /upload
+router.post('/', async (req, res) => {
+  try {
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).json({ success: false, message: 'No files uploaded' });
     }
+
+    // Grab whichever file was sent
+    const fileKey = Object.keys(req.files)[0];
+    const file    = req.files[fileKey];
+
+    // Move to uploads folder
+    const filename = `${Date.now()}-${file.name}`;
+    await file.mv(path.join(uploadDir, filename));
+
+    // Save to Mongo
+    const newContent = new Content({
+      title:     req.body.title || file.name,
+      filePath:  `/uploads/${filename}`,
+      mimeType:  file.mimetype,
+      createdBy: req.user?.id || null
+    });
+    await newContent.save();
+
+    return res.status(201).json({ success: true, content: newContent });
+  } catch (err) {
+    console.error('🛑 Upload handler error:', err);
+    return res.status(500).json({ success: false, message: err.message });
   }
-);
+});
 
 module.exports = router;
+
