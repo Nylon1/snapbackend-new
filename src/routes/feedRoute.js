@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const router = express.Router();
 
-const Content = require('../models/content'); // MongoDB Content model
+const Content = require('../models/Content'); // MongoDB Content model
 
 const uploadsPath = path.join(__dirname, '..', 'public', 'uploads');
 
