@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>SnapNews – Home</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-black text-white min-h-screen">
+
+  <!-- Header -->
+  <header class="text-center py-10 px-4">
+    <img src="/favicon.png" alt="SnapNews Logo" class="w-16 h-16 mx-auto mb-2">
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-yellow-400 mb-2">SnapNews</h1>
+    <p class="text-gray-300 text-base sm:text-lg max-w-md mx-auto">
+      Share your story in 60 seconds. Watch it vanish in 24 hours.
+    </p>
+
+    <!-- Buttons -->
+    <div class="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+      <a href="/upload"
+         class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-6 py-3 rounded-full text-sm sm:text-base">
+         Upload a Video
+      </a>
+      <a href="/feed"
+         class="bg-white/10 hover:bg-white/20 text-white border border-white px-6 py-3 rounded-full text-sm sm:text-base">
+         Watch Snaps
+      </a>
+    </div>
+  </header>
+
+  <!-- Trending Section -->
+  <section class="px-4 py-8 bg-gray-900">
+    <h2 class="text-2xl font-semibold mb-4 text-yellow-400 text-center">Trending Now</h2>
+    <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory px-1">
+      <!-- Snap Card -->
+      <div class="snap-start bg-gray-800 rounded-lg p-3 min-w-[250px] flex-shrink-0">
+        <video controls class="rounded-md w-full">
+          <source src="/uploads/sample1.mp4" type="video/mp4">
+        </video>
+        <h3 class="text-base font-semibold mt-2">Interview Clip</h3>
+        <p class="text-xs text-gray-400">#news #reactions</p>
+      </div>
+
+      <!-- Add more Snap Cards here -->
+    </div>
+  </section>
+
+  <!-- App Prompt -->
+  <section class="text-center px-4 py-10">
+    <h2 class="text-lg sm:text-xl font-semibold text-yellow-400 mb-2">Add SnapNews to your Home Screen</h2>
+    <p class="text-gray-400 max-w-md mx-auto text-sm">
+      Tap your browser menu and choose "Add to Home Screen" for quick access.
+    </p>
+    <img src="/favicon.png" alt="Snap Icon" class="w-12 h-12 mx-auto my-4" />
+    <p class="text-xs text-gray-600">SnapNews © 2025</p>
+  </section>
+
+</body>
+</html>

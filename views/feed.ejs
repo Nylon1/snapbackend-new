@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>SnapNews – Feed</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen">
+
+  <!-- Header -->
+  <header class="sticky top-0 bg-black z-50 flex flex-col sm:flex-row items-center sm:justify-between px-4 sm:px-6 py-4 border-b border-gray-800 text-center sm:text-left gap-3">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-bold text-white">Snap Feed</h1>
+      <p class="text-sm text-gray-400">Watch trending Snaps before they disappear</p>
+    </div>
+    <div>
+      <a href="/upload"
+         class="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-5 py-2 rounded-full text-sm sm:text-base">
+         Upload
+      </a>
+    </div>
+  </header>
+
+  <!-- Snap Feed -->
+  <section class="px-4 pt-6 pb-20">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
+      <% if (videos.length === 0) { %>
+        <p class="text-center text-gray-400 col-span-full">No videos uploaded yet.</p>
+      <% } %>
+
+      <% videos.forEach(function(video, i) { 
+           const timerId = `timer-${i}`;
+      %>
+        <div class="bg-gray-900 rounded-lg p-4 shadow hover:shadow-lg transition">
+          
+          <!-- Video Preview -->
+          <a href="/watch/<%= video.filename %>">
+            <video class="rounded-md w-full mb-3 hover:opacity-80 transition" muted playsinline controls>
+              <source src="/uploads/<%= video.filename %>" type="video/mp4">
+            </video>
+          </a>
+
+          <!-- Snap Title -->
+          <a href="/watch/<%= video.filename %>">
+            <h3 class="text-lg font-semibold text-white hover:underline truncate">
+              <%= video.title || 'Untitled Snap' %>
+            </h3>
+          </a>
+
+          <!-- Snap Description -->
+          <p class="text-sm text-gray-400 mt-1 truncate">
+            <%= video.description || 'No description provided.' %>
+          </p>
+
+          <div class="text-xs text-yellow-400 mt-2">#snapnews</div>
+
+          <!-- Countdown Timer -->
+          <p id="<%= timerId %>" class="text-xs text-red-400 mt-2">Expires in...</p>
+          <span id="expiry-<%= timerId %>" data-expiry="<%= video.expiresAt %>" class="hidden"></span>
+
+          <!-- Share Snap Button -->
+          <button
+            onclick="copyLink('/watch/<%= video.filename %>')"
+            class="text-xs mt-3 inline-flex items-center gap-1 px-3 py-1 bg-yellow-400 text-black rounded hover:bg-yellow-300 transition">
+            🔗 Share Snap
+          </button>
+        </div>
+      <% }); %>
+
+    </div>
+  </section>
+
+  <!-- Countdown + Copy Link Script -->
+  <script>
+    function copyLink(videoPath) {
+      const fullLink = window.location.origin + videoPath;
+      navigator.clipboard.writeText(fullLink).then(() => {
+        alert('Snap link copied to clipboard!');
+      }).catch(err => {
+        alert('Failed to copy link');
+        console.error(err);
+      });
+    }
+
+    function startCountdowns() {
+      document.querySelectorAll('[id^="expiry-timer-"], span[id^="expiry-"]').forEach((el) => {
+        const expiry = parseInt(el.dataset.expiry);
+        const display = document.getElementById(el.id.replace('expiry-', ''));
+
+        const interval = setInterval(() => {
+          const now = Date.now();
+          const distance = expiry - now;
+
+          if (distance <= 0) {
+            display.innerText = "Expired";
+            clearInterval(interval);
+          } else {
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            display.innerText = `Expires in ${hours}h ${minutes}m ${seconds}s`;
+          }
+        }, 1000);
+      });
+    }
+
+    window.onload = startCountdowns;
+  </script>
+
+</body>
+</html>

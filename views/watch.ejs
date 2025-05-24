@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Watch Snap – SnapNews</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Open Graph Meta for WhatsApp / Facebook Preview -->
+  <meta property="og:title" content="Watch this Snap on SnapNews!" />
+  <meta property="og:description" content="Click to view this trending Snap before it disappears." />
+  <meta property="og:image" content="<%= previewImage %>" />
+  <meta property="og:type" content="video.other" />
+  <meta property="og:video" content="<%= videoPath %>" />
+  <meta property="og:video:type" content="video/mp4" />
+  <meta property="og:url" content="https://snap-news.onrender.com/watch/<%= filename %>" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white flex flex-col items-center justify-center min-h-screen px-4 py-8">
+
+  <h1 class="text-2xl font-bold text-yellow-400 mb-4">Watch This Snap</h1>
+
+  <video controls class="rounded-lg w-full max-w-xl shadow-lg mb-4">
+    <source src="<%= videoPath %>" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <a href="/" class="text-sm text-gray-400 hover:text-white underline">← Back to Feed</a>
+
+</body>
+</html>
