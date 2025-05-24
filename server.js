@@ -37,12 +37,35 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+// 1) Health check
+app.get('/health', (req, res) => res.send('OK'));
 
-// Mount routes in order
-app.use(uploadRoute);                    // handles GET/POST /upload
+// 2) Upload routes
+// Assuming routes/upload.js exports a router handling ONLY “/” and “/” POST
+app.use('/upload', uploadRoute);
+
+// 3) News‐feed routes (if you have one)
+const feedRoute = require('./routes/feedRoute');
+app.use('/feed', feedRoute);
+
+// 4) Admin login + protected admin routes
 app.post('/admin/login', adminController.login);
 app.use('/admin', authenticateAdmin, adminRoutes);
+
+// 5) Public content routes
 app.use('/public', publicRoutes);
+
+// 6) (Debug) List all mounted routes
+app.get('/routes', (req, res) => {
+  const routes = app._router.stack
+    .filter(layer => layer.route)
+    .map(layer => ({
+      path:    layer.route.path,
+      methods: Object.keys(layer.route.methods).map(m => m.toUpperCase())
+    }));
+  res.json(routes);
+});
+
 
 // Serve admin UI
 app.use(express.static(path.join(__dirname, 'public')));
