@@ -17,6 +17,9 @@ const publicRoutes    = require('../routes/public');
 const { authenticateAdmin } = require('../middleware/auth');
 
 const app = express();
+const fileUpload = require('express-fileupload');
+app.use(fileUpload());  // enable express-fileupload
+
 
 // Global CORS
 app.use(cors({
@@ -113,3 +116,4 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => {
   console.error('❌ MongoDB error:', err);
 });
+
