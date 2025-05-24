@@ -25,6 +25,7 @@ app.use(cors({
   origin: [
     'https://snap-news.onrender.com',
     'https://snapbackend-new.onrender.com',
+    https://snap-news-admin-panel-1234.onrender.com
     'http://localhost:3000'
   ],
   credentials: true
