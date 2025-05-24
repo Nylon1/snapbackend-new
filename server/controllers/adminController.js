@@ -1,4 +1,4 @@
-const Content = require('../../models/Content'); // ✅ correct
+ const Content = require('../../models/content'); // ✅ correct
 
 const { signToken } = require('../utils/jwt');
 
