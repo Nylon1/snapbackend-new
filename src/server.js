@@ -116,4 +116,4 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => {
   console.error('❌ MongoDB error:', err);
 });
-app.use('/upload', require('./routes/upload'));
+
