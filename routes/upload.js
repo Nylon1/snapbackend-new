@@ -29,27 +29,4 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter, limits: { fileSize: 50 * 1024 * 1024 } }); // 50MB limit
 
 // Mongoose model (adjusted path to root models)
-const Content = require('../../models/content');
-
-// POST /upload
-router.post('/', upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
-
-    // Create a new content record
-    const newContent = new Content({
-      title: req.body.title || req.file.originalname,
-      filePath: `/uploads/${req.file.filename}`,
-      mimeType: req.file.mimetype,
-      createdBy: req.user?.id || null
-    });
-
-    await newContent.save();
-    res.status(201).json({ success: true, content: newContent });
-  } catch (err) {
-    console.error('Upload error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
-
-module.exports = router;
+const Content = require('../models/content');
