@@ -1,4 +1,6 @@
 require('dotenv').config();
+console.log('📍 Loaded server.js from:', __filename);
+
 console.log("🔑 SESSION_SECRET is:", process.env.SESSION_SECRET);
 
 const express  = require('express');
