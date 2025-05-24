@@ -28,8 +28,8 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter, limits: { fileSize: 50 * 1024 * 1024 } }); // 50MB limit
 
-// Mongoose model (adjust path if needed)
-const Content = require('../models/content');
+// Mongoose model (adjusted path to root models)
+const Content = require('../../models/content');
 
 // POST /upload
 router.post('/', upload.single('file'), async (req, res) => {
@@ -41,7 +41,7 @@ router.post('/', upload.single('file'), async (req, res) => {
       title: req.body.title || req.file.originalname,
       filePath: `/uploads/${req.file.filename}`,
       mimeType: req.file.mimetype,
-      createdBy: req.user?.id || null  // if using auth middleware
+      createdBy: req.user?.id || null
     });
 
     await newContent.save();
