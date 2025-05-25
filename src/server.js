@@ -87,7 +87,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: 'none',                   // allow cross-site
-      secure:  secure: true,
+      secure: true,
       maxAge: 1000 * 60 * 60 * 24         // 1 day in milliseconds
     }
   })
