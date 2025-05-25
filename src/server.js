@@ -13,6 +13,7 @@ const fs           = require('fs');
 const fileUpload   = require('express-fileupload');
 const MongoStore   = require('connect-mongo');
 const cookieParser = require('cookie-parser');
+const { listPendingContent } = require('./controllers/adminController');
 
 const app = express();
 
@@ -34,6 +35,15 @@ const corsOptions = {
 app.use(cors(corsOptions));
 // Answer preflights for every route
 app.options('*', cors(corsOptions));
+
+// Explicit CORS + auth for pending-content
+app.get(
+  '/admin/pending-content',
+  cors(corsOptions),        // ← applies CORS headers to the GET
+  authenticateAdmin,        // ← then enforce auth
+  listPendingContent        // ← finally call your controller
+);
+
 
 // Parse JSON bodies and URL-encoded form data
 app.use(express.json());
