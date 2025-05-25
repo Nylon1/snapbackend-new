@@ -1,4 +1,4 @@
-const jwt = require('../utils/jwt');
+const { verifyToken } = require('../utils/jwt');
 
 function authenticateAdmin(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1] || req.session?.token;
