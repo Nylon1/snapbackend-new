@@ -70,16 +70,26 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
-      ttl: 60 * 60 * 24,      // 1 day in seconds
+      ttl: 60 * 60 * 24,
       autoRemove: 'native'
     }),
-    
-    app.get(
-  '/admin/pending-content',
-  cors(corsOptions),        // ← applies CORS headers to the GET
-  authenticateAdmin,        // ← then enforce auth
-  listPendingContent        // ← finally call your controller
+    cookie: {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 1000 * 60 * 60 * 24
+    }
+  })
 );
+
+// NOW put this line OUTSIDE (below) the session block:
+app.get(
+  '/admin/pending-content',
+  cors(corsOptions),
+  authenticateAdmin,
+  listPendingContent
+);
+
 
     cookie: {
       httpOnly: true,
