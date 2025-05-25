@@ -90,6 +90,12 @@ app.get(
   listPendingContent
 );
 
+app.get('/cookie-test', (req, res) => {
+  req.session.hello = 'world';
+  req.session.save(() => {
+    res.json({ session: req.session });
+  });
+});
 
 // 3️⃣ Static assets
 app.use(express.static(path.join(__dirname, '../public')));
