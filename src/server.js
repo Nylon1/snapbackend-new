@@ -21,20 +21,14 @@ const app = express();
 // Global CORS
 // Define your CORS settings once
 const corsOptions = {
-  origin: [
-    'https://snap-news.onrender.com',
-    'https://snapbackend-new.onrender.com',
-    'https://snap-news-admin-panel-1234.onrender.com',
-    'http://localhost:3000'
-  ],
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
-  credentials: true
+  origin: 'https://snap-news-admin-panel-1234.onrender.com',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// Apply CORS globally
+// MUST be before all routes and sessions!
 app.use(cors(corsOptions));
-// Answer preflights for every route
 app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
