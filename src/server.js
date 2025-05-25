@@ -42,7 +42,25 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  // ⚠️ Persist sessions or else in-memory store will drop on every restart:
+  // ⚠️ Persist sessions orapp.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+
+  // replace your old v3-style store here:
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    ttl: 60 * 60 * 24,
+    autoRemove: 'native'
+  }),
+
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 * 24
+  }
+}));
+ else in-memory store will drop on every restart:
   store: new (require('connect-mongo')(session))({
     mongooseConnection: mongoose.connection
   }),
