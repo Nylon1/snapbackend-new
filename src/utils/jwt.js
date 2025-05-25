@@ -1,15 +1,21 @@
-// src/src/utils/jwt.js
+// src/utils/jwt.js
+require('dotenv').config();
+
 const jwt = require('jsonwebtoken');
+const SECRET = process.env.JWT_SECRET;
 
-function signToken(payload) {
-  // Try JWT_SECRET first, then SESSION_SECRET
-  const secret = process.env.JWT_SECRET || process.env.SESSION_SECRET;
-
-  if (!secret) {
-    throw new Error('❌ JWT_SECRET (or SESSION_SECRET) is not defined');
-  }
-
-  return jwt.sign(payload, secret, { expiresIn: '1h' });
+if (!SECRET) {
+  console.error('🛡️ MISSING JWT_SECRET in .env!');
+  process.exit(1);
 }
 
-module.exports = { signToken };
+function signToken(payload, options = {}) {
+  return jwt.sign({ ...payload }, SECRET, { expiresIn: '1h', ...options });
+}
+
+function verifyToken(token) {
+  return jwt.verify(token, SECRET);
+}
+
+module.exports = { signToken, verifyToken };
+
