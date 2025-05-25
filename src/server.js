@@ -32,12 +32,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
-app.get(
-  '/admin/pending-content',
-  cors(corsOptions),        // ← applies CORS headers to the GET
-  authenticateAdmin,        // ← then enforce auth
-  listPendingContent        // ← finally call your controller
-);
+
 
 
 // Parse JSON bodies and URL-encoded form data
@@ -78,6 +73,14 @@ app.use(
       ttl: 60 * 60 * 24,      // 1 day in seconds
       autoRemove: 'native'
     }),
+    
+    app.get(
+  '/admin/pending-content',
+  cors(corsOptions),        // ← applies CORS headers to the GET
+  authenticateAdmin,        // ← then enforce auth
+  listPendingContent        // ← finally call your controller
+);
+
     cookie: {
       httpOnly: true,
       sameSite: 'none',                   // allow cross-site
