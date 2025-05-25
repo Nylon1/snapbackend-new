@@ -10,8 +10,8 @@ const session      = require('express-session');
 const path         = require('path');
 const fs           = require('fs');
 const fileUpload   = require('express-fileupload');
-const { authenticateAdmin } = require('./auth');
 
+const app = express();
 
 // Configure EJS view engine
 app.set('views', path.join(__dirname, '../views'));
