@@ -6,26 +6,25 @@ const { signToken } = require('../utils/jwt');
 
 const Trending = require('../models/Trending');
 // ==================== Login ====================
-exports.login = (req, res) => {
+// controllers/adminController.js
+exports.login = (req, res, next) => {
   try {
-    console.log("📥 Login body:", req.body);
-
     const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Missing credentials' });
-    }
-
     if (username === 'admin' && password === 'password123') {
+      // 1) Sign the token
       const token = signToken({ role: 'Super Admin' });
-      console.log("✅ Token created:", token);
-      return res.json({ token });
-    }
 
-    res.status(401).json({ message: 'Invalid credentials' });
+      // 2) Persist it into session
+      req.session.token = token;
+      return req.session.save(err => {
+        if (err) return next(err);
+        // 3) Respond (you can render or JSON as desired)
+        return res.json({ message: 'Logged in', token });
+      });
+    }
+    return res.status(401).json({ message: 'Invalid credentials' });
   } catch (err) {
-    console.error("❌ Login crash:", err);
-    res.status(500).json({ message: 'Internal server error during login' });
+    return next(err);
   }
 };
 
