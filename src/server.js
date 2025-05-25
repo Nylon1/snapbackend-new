@@ -10,7 +10,7 @@ const session      = require('express-session');
 const path         = require('path');
 const fs           = require('fs');
 const fileUpload   = require('express-fileupload');
-
+const MongoStore = require('connect-mongo');
 const app = express();
 
 // Configure EJS view engine
