@@ -62,13 +62,14 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
-      ttl: 60 * 60 * 24,
+      ttl: 60 * 60 * 24,      // 1 day in seconds
       autoRemove: 'native'
     }),
     cookie: {
-       sameSite: 'none',
-   secure: process.env.NODE_ENV === 'production'
-      maxAge: 1000 * 60 * 60 * 24
+      httpOnly: true,
+      sameSite: 'none',                   // allow cross-site
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1000 * 60 * 60 * 24         // 1 day in milliseconds
     }
   })
 );
