@@ -75,14 +75,14 @@ app.use(
     }),
     cookie: {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'none',   // this is now valid
       secure: true,
       maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
 
-// NOW put this line OUTSIDE (below) the session block:
+// Now define your route (OUTSIDE the session block!)
 app.get(
   '/admin/pending-content',
   cors(corsOptions),
@@ -90,15 +90,6 @@ app.get(
   listPendingContent
 );
 
-
-    cookie: {
-      httpOnly: true,
-      sameSite: 'none',                   // allow cross-site
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 24         // 1 day in milliseconds
-    }
-  })
-);
 
 // 3️⃣ Static assets
 app.use(express.static(path.join(__dirname, '../public')));
