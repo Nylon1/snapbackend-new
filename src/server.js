@@ -36,13 +36,23 @@ app.use(cors({
 app.options('*', cors());
 
 // Body parsing & sessions
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  // ⚠️ Persist sessions or else in-memory store will drop on every restart:
+  store: new (require('connect-mongo')(session))({
+    mongooseConnection: mongoose.connection
+  }),
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',        // or 'none' + secure if you’re cross-site
+    maxAge: 1000 * 60 * 60 * 24
+  }
 }));
+
 
 // Serve static files (public assets)
 app.use(express.static(path.join(__dirname, '../public')));
