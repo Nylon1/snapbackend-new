@@ -1,6 +1,9 @@
 const { verifyToken } = require('../utils/jwt');
 
 function authenticateAdmin(req, res, next) {
+   if (req.method === 'OPTIONS') {
+    return next();
+  }
   // 2. Extract token from header or session
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ')
