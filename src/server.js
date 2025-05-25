@@ -16,6 +16,11 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
+// Parse JSON bodies and URL-encoded form data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
 // 0️⃣ Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
