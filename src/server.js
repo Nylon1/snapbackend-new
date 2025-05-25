@@ -57,6 +57,13 @@ app.use(session({
 // Serve static files (public assets)
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Serve uploaded video files
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '../uploads'))
+);
+
+
 // 1) Health check
 app.get('/health', (req, res) => res.send('OK'));
 
