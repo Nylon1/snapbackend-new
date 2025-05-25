@@ -16,6 +16,25 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
+// Global CORS
+// Define your CORS settings once
+const corsOptions = {
+  origin: [
+    'https://snap-news.onrender.com',
+    'https://snapbackend-new.onrender.com',
+    'https://snap-news-admin-panel-1234.onrender.com',
+    'http://localhost:3000'
+  ],
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: true
+};
+
+// Apply CORS globally
+app.use(cors(corsOptions));
+// Answer preflights for every route
+app.options('*', cors(corsOptions));
+
 // Parse JSON bodies and URL-encoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,24 +56,7 @@ app.set('view engine', 'ejs');
 // Enable file uploads
 app.use(fileUpload());
 
-// Global CORS
-// Define your CORS settings once
-const corsOptions = {
-  origin: [
-    'https://snap-news.onrender.com',
-    'https://snapbackend-new.onrender.com',
-    'https://snap-news-admin-panel-1234.onrender.com',
-    'http://localhost:3000'
-  ],
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
-  credentials: true
-};
 
-// Apply CORS globally
-app.use(cors(corsOptions));
-// Answer preflights for every route
-app.options('*', cors(corsOptions));
 
 
 // 1️⃣ Parse cookies
