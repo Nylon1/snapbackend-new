@@ -13,8 +13,9 @@ const fs           = require('fs');
 const fileUpload   = require('express-fileupload');
 const MongoStore   = require('connect-mongo');
 const cookieParser = require('cookie-parser');
-const { listPendingContent } = require('./controllers/adminController');
-const { authenticateAdmin }     = require('./middleware/auth');
+const { authenticateAdmin }   = require('./middleware/auth');
+const { listPendingContent }  = require('./controllers/adminController');
+const adminController         = require('./controllers/adminController');
 const app = express();
 
 // Global CORS
