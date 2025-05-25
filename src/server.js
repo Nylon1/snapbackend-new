@@ -47,31 +47,27 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
 
-  // replace your old v3-style store here:
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    ttl: 60 * 60 * 24,
-    autoRemove: 'native'
-  }),
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
 
-  cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 24
-  }
-}));
- 
-  store: new (require('connect-mongo')(session))({
-    mongooseConnection: mongoose.connection
-  }),
-  cookie: {
-    httpOnly: true,
-    sameSite: 'lax',        // or 'none' + secure if you’re cross-site
-    maxAge: 1000 * 60 * 60 * 24
-  }
-}));
+    // ← only this store! (v4+ syntax)
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 60 * 60 * 24,      // 1 day in seconds
+      autoRemove: 'native'
+    }),
 
-
+    // ← only one cookie block!
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',        // adjust if you need cross-site
+      maxAge: 1000 * 60 * 60 * 24
+    }
+  })
+);
 // Serve static files (public assets)
 app.use(express.static(path.join(__dirname, '../public')));
 
