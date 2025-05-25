@@ -1,7 +1,8 @@
+// src/server.js
+
 require('dotenv').config();
 console.log('📍 Loaded server.js from:', __filename);
-
-console.log("🔑 SESSION_SECRET is:", process.env.SESSION_SECRET);
+console.log('🔑 SESSION_SECRET is:', process.env.SESSION_SECRET);
 
 const express      = require('express');
 const cors         = require('cors');
@@ -10,14 +11,25 @@ const session      = require('express-session');
 const path         = require('path');
 const fs           = require('fs');
 const fileUpload   = require('express-fileupload');
-const MongoStore = require('connect-mongo');
+const MongoStore   = require('connect-mongo');
+const cookieParser = require('cookie-parser');
+
 const app = express();
+
+// 0️⃣ Connect to MongoDB
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Configure EJS view engine
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
-// Enable file uploads (express-fileupload)
+// Enable file uploads
 app.use(fileUpload());
 
 // Global CORS
@@ -25,55 +37,45 @@ app.use(cors({
   origin: [
     'https://snap-news.onrender.com',
     'https://snapbackend-new.onrender.com',
-    'https://snap-news-admin-panel-1234.onrender.com', // ← comma added here
+    'https://snap-news-admin-panel-1234.onrender.com',
     'http://localhost:3000'
   ],
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
-  credentials: true        // ← allows cookies/auth headers
+  credentials: true
 }));
-
 app.options('*', cors());
 
-// Body parsing & sessions
-const cookieParser = require('cookie-parser');
+// 1️⃣ Parse cookies
 app.use(cookieParser());
 
-// 2️⃣ Serve uploads (already in place)
-// app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
-// 3️⃣ Session middleware (only one of these!)
+// 2️⃣ Session middleware (v4+ connect-mongo)
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
-      ttl: 60 * 60 * 24,      // 1 day in seconds
+      mongoUrl: process.env.MONGO_URI,
+      ttl: 60 * 60 * 24,
       autoRemove: 'native'
     }),
     cookie: {
       httpOnly: true,
-      sameSite: 'lax',        // change to 'none' & secure in prod cross-site
+      sameSite: 'lax',
       maxAge: 1000 * 60 * 60 * 24
     }
   })
 );
-// Serve static files (public assets)
+
+// 3️⃣ Static assets
 app.use(express.static(path.join(__dirname, '../public')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Serve uploaded video files
-app.use(
-  '/uploads',
-  express.static(path.join(__dirname, '../uploads'))
-);
-
-
-// 1) Health check
+// 4️⃣ Health check
 app.get('/health', (req, res) => res.send('OK'));
 
-// 2) Inline upload endpoint
+// 5️⃣ Inline upload endpoint
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -106,40 +108,41 @@ app.post('/upload', async (req, res) => {
   }
 });
 
-// 3) Feed route — render feed.ejs with approved videos
+// 6️⃣ Feed & watch routes
 app.get('/feed', require('./routes/feedRoute'));
-
-// 4) Watch route — render watch.ejs for individual video
 app.get('/watch/:filename', require('./routes/watchRoute'));
 
-// 5) Admin and public routes
-const adminController = require('./controllers/adminController');
-const adminRoutes     = require('./routes/admin');
-const publicRoutes    = require('./routes/public');
+// 7️⃣ Admin & public endpoints
+const adminController    = require('./controllers/adminController');
+const adminRoutes        = require('./routes/admin');
+const publicRoutes       = require('./routes/public');
 const { authenticateAdmin } = require('./middleware/auth');
 
 app.post('/admin/login', adminController.login);
 app.use('/admin', authenticateAdmin, adminRoutes);
 app.use('/public', publicRoutes);
 
-// 6) Debug: list mounted routes
+// 8️⃣ Debug: list mounted routes
 app.get('/routes', (req, res) => {
   const routes = app._router.stack
     .filter(layer => layer.route)
-    .map(layer => ({ path: layer.route.path, methods: Object.keys(layer.route.methods).map(m => m.toUpperCase()) }));
+    .map(layer => ({
+      path: layer.route.path,
+      methods: Object.keys(layer.route.methods).map(m => m.toUpperCase())
+    }));
   res.json(routes);
 });
 
 console.log('—— MOUNTED ROUTES ——');
 app._router.stack
   .filter(layer => layer.route)
-  .forEach(layer => console.log(Object.keys(layer.route.methods).map(m => m.toUpperCase()).join(','), layer.route.path));
+  .forEach(layer =>
+    console.log(
+      Object.keys(layer.route.methods).map(m => m.toUpperCase()).join(','),
+      layer.route.path
+    )
+);
 
-// Start server after DB connect
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('✅ MongoDB connected');
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch(err => console.error('❌ MongoDB error:', err));
+// 9️⃣ Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
