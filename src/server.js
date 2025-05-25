@@ -12,7 +12,6 @@ const fs           = require('fs');
 const fileUpload   = require('express-fileupload');
 const { authenticateAdmin } = require('./auth');
 
-const adminRoutes = require('./routes/admin'); 
 
 // Configure EJS view engine
 app.set('views', path.join(__dirname, '../views'));
