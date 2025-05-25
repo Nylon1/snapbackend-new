@@ -81,6 +81,10 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // 4️⃣ Health check
 app.get('/health', (req, res) => res.send('OK'));
 
++app.get('/upload', (req, res) => {
++  res.render('upload');
++});
+
 // 5️⃣ Inline upload endpoint
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
