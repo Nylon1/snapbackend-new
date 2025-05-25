@@ -141,7 +141,7 @@ app.get('/feed', require('./routes/feedRoute'));
 app.get('/watch/:filename', require('./routes/watchRoute'));
 
 // 7️⃣ Admin & public endpoints
-const adminController    = require('./controllers/adminController');
+
 const adminRoutes        = require('./routes/admin');
 const publicRoutes       = require('./routes/public');
 const { authenticateAdmin } = require('./middleware/auth');
