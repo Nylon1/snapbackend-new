@@ -49,6 +49,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: true
 }));
+app.use(cors(corsOptions));
 app.options('*', cors());
 
 // 1️⃣ Parse cookies
