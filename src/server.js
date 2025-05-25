@@ -38,32 +38,24 @@ app.options('*', cors());
 // Body parsing & sessions
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  // ⚠️ Persist sessions orapp.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
 
+// 2️⃣ Serve uploads (already in place)
+// app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// 3️⃣ Session middleware (only one of these!)
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-
-    // ← only this store! (v4+ syntax)
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
       ttl: 60 * 60 * 24,      // 1 day in seconds
       autoRemove: 'native'
     }),
-
-    // ← only one cookie block!
     cookie: {
       httpOnly: true,
-      sameSite: 'lax',        // adjust if you need cross-site
+      sameSite: 'lax',        // change to 'none' & secure in prod cross-site
       maxAge: 1000 * 60 * 60 * 24
     }
   })
