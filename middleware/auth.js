@@ -1,7 +1,7 @@
 const { verifyToken } = require('../utils/jwt');
 
 function authenticateAdmin(req, res, next) {
-   if (req.method === 'OPTIONS') {
+  if (req.method === 'OPTIONS') {
     return next();
   }
   // 2. Extract token from header or session
@@ -29,5 +29,6 @@ function authenticateAdmin(req, res, next) {
 }
 
 module.exports = { authenticateAdmin };
+
 
 
