@@ -6,10 +6,13 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 
-// Multer config: video files only, max 200MB
+// 1️⃣ Multer config (video files only, max 200MB)
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
 const upload = multer({
-  dest: path.join(__dirname, '..', 'uploads'),
-  limits: { fileSize: 200 * 1024 * 1024 }, // 200 MB max
+  dest: uploadsDir,
+  limits: { fileSize: 200 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype && file.mimetype.startsWith('video/')) {
       cb(null, true);
@@ -19,60 +22,73 @@ const upload = multer({
   }
 });
 
-// Proxy POST route
+// 2️⃣ Helper: Login to MediaCMS and get JWT
+async function getMediaCMSJwt() {
+  const LOGIN_URL = 'https://mediacms-cw-u46015.vm.elestio.app/api/v1/login';
+  const TOKEN_URL = 'https://mediacms-cw-u46015.vm.elestio.app/api/v1/user/token';
+
+  // These should be kept secret (env var!)
+  const username = process.env.MEDIACMS_ADMIN_USER || 'admin';
+  const password = process.env.MEDIACMS_ADMIN_PASSWORD || 'your_password_here';
+
+  // 1. Login to get session cookie
+  const loginRes = await axios.post(
+    LOGIN_URL,
+    { username, password },
+    { withCredentials: true }
+  );
+  const cookies = loginRes.headers['set-cookie'];
+  if (!cookies) throw new Error('Failed to get login cookies from MediaCMS');
+
+  // 2. Get JWT using session cookie
+  const tokenRes = await axios.get(
+    TOKEN_URL,
+    { headers: { Cookie: cookies.join(';') } }
+  );
+  if (!tokenRes.data.token) throw new Error('Failed to obtain JWT from MediaCMS');
+  return tokenRes.data.token;
+}
+
+// 3️⃣ The Main Proxy Upload Handler
 router.post('/upload', upload.single('video'), async (req, res) => {
   if (!req.file) return res.status(400).send('No video uploaded.');
 
-  // Get title, description, category from the form (optional)
   const { title, description, category } = req.body;
 
   try {
-    // 1. Get MediaCMS token
-    const tokenRes = await axios.post(
-      'https://snapbackend-new.onrender.com/api/mediacms-token'
-    );
-    const token = tokenRes.data.token;
-    if (!token) throw new Error('Failed to get MediaCMS token.');
+    // A. Get JWT from MediaCMS
+    const jwt = await getMediaCMSJwt();
 
-    // 2. Prepare FormData for MediaCMS
+    // B. Prepare FormData
     const form = new FormData();
     form.append('media_file', fs.createReadStream(req.file.path), req.file.originalname);
     if (title) form.append('title', title);
     if (description) form.append('description', description);
     if (category) form.append('category', category);
 
-    // 3. Upload to MediaCMS
-    const mcmsRes = await axios.post(
+    // C. Upload to MediaCMS
+    const uploadRes = await axios.post(
       'https://mediacms-cw-u46015.vm.elestio.app/api/v1/media/',
       form,
       {
         headers: {
           ...form.getHeaders(),
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${jwt}`
         },
         maxContentLength: Infinity,
         maxBodyLength: Infinity
       }
     );
 
-    // 4. Clean up (delete file)
+    // D. Delete temp file
     fs.unlink(req.file.path, () => {});
 
-    // 5. Success
-    res.send('Video uploaded successfully! (pending admin approval)');
+    // E. Success
+    res.status(201).json({ success: true, detail: 'Video uploaded successfully!', mcms: uploadRes.data });
   } catch (err) {
-    // Delete file if something fails
     if (req.file && req.file.path) fs.unlink(req.file.path, () => {});
-    // Multer file size or type error
-    if (err instanceof multer.MulterError) {
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).send('File too large. Max 200MB allowed.');
-      }
-      return res.status(400).send('Upload error: ' + err.message);
-    }
-    // Other errors
     console.error('Upload error:', err.response?.data || err.message);
-    res.status(500).send('Failed to upload: ' + (err.response?.data?.detail || err.message));
+    res.status(500).json({ success: false, error: err.response?.data || err.message });
   }
 });
 
