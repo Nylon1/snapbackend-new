@@ -3,8 +3,8 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-const MCMS_USER = process.env.MCMS_USER || 'YOUR_MEDIACMS_USER';
-const MCMS_PASS = process.env.MCMS_PASS || 'YOUR_MEDIACMS_PASSWORD';
+const MCMS_USER = process.env.MCMS_USER || 'admin';
+const MCMS_PASS = process.env.MCMS_PASS || 'Latif1990?';
 
 router.post('/', async (req, res) => {
   try {
