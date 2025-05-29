@@ -43,7 +43,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 
     // 3. Upload to MediaCMS
     const mcmsRes = await axios.post(
-      'https://mediacms-cw-u46015.vm.elestio.app/api/v1/media/upload/',
+      'https://mediacms-cw-u46015.vm.elestio.app/api/v1/media/',
       form,
       {
         headers: {
