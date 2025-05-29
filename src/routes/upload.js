@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 
-// 1️⃣ Multer config (video files only, max 200MB)
+// Multer setup (videos only, 200MB max)
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
@@ -22,53 +22,43 @@ const upload = multer({
   }
 });
 
-// 2️⃣ Helper: Login to MediaCMS and get JWT
+// Helper: Get JWT token from MediaCMS
 async function getMediaCMSJwt() {
   const LOGIN_URL = 'https://mediacms-cw-u46015.vm.elestio.app/api/v1/login';
   const TOKEN_URL = 'https://mediacms-cw-u46015.vm.elestio.app/api/v1/user/token';
 
-  // These should be kept secret (env var!)
-  const username = process.env.MEDIACMS_ADMIN_USER || 'admin';
-  const password = process.env.MEDIACMS_ADMIN_PASSWORD || 'your_password_here';
+  const username = process.env.MEDIACMS_ADMIN_USER;
+  const password = process.env.MEDIACMS_ADMIN_PASSWORD;
 
-  // 1. Login to get session cookie
-  const loginRes = await axios.post(
-    LOGIN_URL,
-    { username, password },
-    { withCredentials: true }
-  );
+  // 1. Login for session cookie
+  const loginRes = await axios.post(LOGIN_URL, { username, password }, { withCredentials: true });
   const cookies = loginRes.headers['set-cookie'];
   if (!cookies) throw new Error('Failed to get login cookies from MediaCMS');
 
-  // 2. Get JWT using session cookie
-  const tokenRes = await axios.get(
-    TOKEN_URL,
-    { headers: { Cookie: cookies.join(';') } }
-  );
+  // 2. Use cookie to get JWT
+  const tokenRes = await axios.get(TOKEN_URL, { headers: { Cookie: cookies.join(';') } });
   if (!tokenRes.data.token) throw new Error('Failed to obtain JWT from MediaCMS');
   return tokenRes.data.token;
 }
 
-// 3️⃣ The Main Proxy Upload Handler
+// Main route: Proxy upload to MediaCMS
 router.post('/upload', upload.single('video'), async (req, res) => {
   if (!req.file) return res.status(400).send('No video uploaded.');
 
   const { title, description, category } = req.body;
-
   try {
-    // A. Get JWT from MediaCMS
+    // A. Get JWT token
     const jwt = await getMediaCMSJwt();
 
-    // B. Prepare FormData
+    // B. Prepare FormData with proper filename!
     const form = new FormData();
-    // B. Prepare FormData
-form.append('media_file', fs.createReadStream(req.file.path), {
-  filename: req.file.originalname,
-  contentType: req.file.mimetype
-});
-if (title) form.append('title', title);
-if (description) form.append('description', description);
-if (category) form.append('category', category);
+    form.append('media_file', fs.createReadStream(req.file.path), {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype
+    });
+    if (title) form.append('title', title);
+    if (description) form.append('description', description);
+    if (category) form.append('category', category);
 
     // C. Upload to MediaCMS
     const uploadRes = await axios.post(
@@ -84,10 +74,9 @@ if (category) form.append('category', category);
       }
     );
 
-    // D. Delete temp file
+    // D. Clean up temp file
     fs.unlink(req.file.path, () => {});
 
-    // E. Success
     res.status(201).json({ success: true, detail: 'Video uploaded successfully!', mcms: uploadRes.data });
   } catch (err) {
     if (req.file && req.file.path) fs.unlink(req.file.path, () => {});
