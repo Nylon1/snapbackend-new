@@ -17,6 +17,7 @@ const { authenticateAdmin }   = require('./middleware/auth');
 const { listPendingContent }  = require('./controllers/adminController');
 const adminController         = require('./controllers/adminController');
 const app = express();
+const mediacmsTokenRoute = require('./src/routes/mediacmsToken');
 
 // Global CORS
 // Define your CORS settings once
@@ -33,7 +34,7 @@ app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
 
-
+app.use('/api/mediacms-token', mediacmsTokenRoute);
 
 // Parse JSON bodies and URL-encoded form data
 app.use(express.json());
