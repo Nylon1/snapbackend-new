@@ -36,7 +36,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 
     // 2. Prepare FormData for MediaCMS
     const form = new FormData();
-    form.append('file', fs.createReadStream(req.file.path), req.file.originalname);
+    form.append('media_file', fs.createReadStream(req.file.path), req.file.originalname);
     if (title) form.append('title', title);
     if (description) form.append('description', description);
     if (category) form.append('category', category);
