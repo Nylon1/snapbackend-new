@@ -10,7 +10,7 @@ const mongoose     = require('mongoose');
 const session      = require('express-session');
 const path         = require('path');
 const fs           = require('fs');
-const fileUpload   = require('express-fileupload');
+
 const MongoStore   = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const { authenticateAdmin }   = require('./middleware/auth');
@@ -18,6 +18,8 @@ const { listPendingContent }  = require('./controllers/adminController');
 const adminController         = require('./controllers/adminController');
 const app = express();
 const mediacmsTokenRoute = require('./routes/mediacmsToken');
+const uploadRoute = require('./routes/upload');
+
 
 // Global CORS
 const corsOptions = {
@@ -39,6 +41,7 @@ app.options('*', cors(corsOptions));
 // Explicit CORS + auth for pending-content
 
 app.use('/api/mediacms-token', mediacmsTokenRoute);
+app.use('/', uploadRoute);
 
 // Parse JSON bodies and URL-encoded form data
 app.use(express.json());
@@ -59,7 +62,7 @@ app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'ejs');
 
 // Enable file uploads
-app.use(fileUpload());
+
 
 
 
@@ -113,38 +116,7 @@ app.get('/upload', (req, res) => {
   res.render('upload');
 });
 
-// 5️⃣ Inline upload endpoint
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-app.post('/upload', async (req, res) => {
-  try {
-    if (!req.files || !Object.keys(req.files).length) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-    const key      = Object.keys(req.files)[0];
-    const file     = req.files[key];
-    const filename = `${Date.now()}-${file.name}`;
-    const filePath = `/uploads/${filename}`;
-
-    await file.mv(path.join(uploadDir, filename));
-
-    const Content = require('./models/Content');
-    const newContent = new Content({
-      title:     req.body.title || file.name,
-      filePath,
-      videoUrl:  filePath,
-      mimeType:  file.mimetype,
-      createdBy: req.user?.id || null
-    });
-    await newContent.save();
-
-    res.status(201).json({ success: true, content: newContent });
-  } catch (err) {
-    console.error('🛑 Upload handler error:', err);
-    res.status(500).json({ success: false, message: err.message });
-  }
-});
 
 // 6️⃣ Feed & watch routes
 app.get('/feed', require('./routes/feedRoute'));
