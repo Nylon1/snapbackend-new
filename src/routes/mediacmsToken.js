@@ -17,16 +17,15 @@ router.post('/', async (req, res) => {
       params,
       { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
-    if (response.data && response.data.access_token) {
-      // ✅ This is the key line
-      return res.json({ token: response.data.access_token });
+    // FIX: Check both 'access_token' and 'token'
+    const token = response.data.access_token || response.data.token;
+    if (token) {
+      return res.json({ token });
     } else {
-      // Log and send details if the response is missing the token
-      console.error('No access_token in MediaCMS response:', response.data);
-      return res.status(500).json({ error: 'No access_token', details: response.data });
+      console.error('No access_token or token in response:', response.data);
+      return res.status(500).json({ error: 'No access_token or token', details: response.data });
     }
   } catch (err) {
-    // Log and send any axios error
     console.error('MediaCMS login failed:', err.response ? err.response.data : err.message);
     return res.status(500).json({ error: 'Failed to get MediaCMS token', details: err.response ? err.response.data : err.message });
   }
