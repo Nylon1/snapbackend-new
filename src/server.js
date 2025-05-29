@@ -17,7 +17,7 @@ const { authenticateAdmin }   = require('./middleware/auth');
 const { listPendingContent }  = require('./controllers/adminController');
 const adminController         = require('./controllers/adminController');
 const app = express();
-const mediacmsTokenRoute = require('./src/routes/mediacmsToken');
+const mediacmsTokenRoute = require('./routes/mediacmsToken');
 
 // Global CORS
 // Define your CORS settings once
