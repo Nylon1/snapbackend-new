@@ -52,10 +52,9 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 
     // B. Prepare FormData with proper filename!
     const form = new FormData();
-    form.append('media_file', fs.createReadStream(req.file.path), {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype
-    });
+  form.append('media_file', fs.createReadStream(req.file.path), req.file.originalname);
+
+    
     if (title) form.append('title', title);
     if (description) form.append('description', description);
     if (category) form.append('category', category);
