@@ -20,13 +20,17 @@ const app = express();
 const mediacmsTokenRoute = require('./routes/mediacmsToken');
 
 // Global CORS
-// Define your CORS settings once
 const corsOptions = {
-  origin: 'https://snap-news-admin-panel-1234.onrender.com',
+  origin: [
+    'https://snap-news-admin-panel-1234.onrender.com',
+    'https://snap-news.onrender.com'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
+
+
 
 // MUST be before all routes and sessions!
 app.use(cors(corsOptions));
