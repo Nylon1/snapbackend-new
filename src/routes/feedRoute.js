@@ -1,50 +1,30 @@
 const express = require('express');
-const path    = require('path');
-const fs      = require('fs');
-const router  = express.Router();
-
-const Content = require('../models/Content');
-
-// ** point to the real uploads directory **
-const uploadsPath = path.join(__dirname, '..', 'uploads');
+const axios = require('axios');
+const router = express.Router();
 
 router.get('/feed', async (req, res) => {
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
   try {
-    // 1) Clean up expired
-    const expiredVideos = await Content.find({ createdAt: { $lt: cutoff } });
-    for (let vid of expiredVideos) {
-      // pick whichever field stores the file URL
-      const relPath = vid.videoUrl || vid.filePath;
-      if (relPath) {
-        // strip off any leading slash
-        const filename = path.basename(relPath);
-        const fullPath = path.join(uploadsPath, filename);
-        if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+    // 1. Fetch recent videos from MediaCMS (last 24 hours)
+    const response = await axios.get('https://mediacms-cw-u46015.vm.elestio.app/api/v1/media/', {
+      params: {
+        ordering: '-add_date',
+        limit: 50
       }
-      await Content.deleteOne({ _id: vid._id });
-    }
+    });
 
-    // 2) Fetch approved
-    const approvedVideos = await Content
-      .find({ status: 'approved' })
-      .sort({ createdAt: -1 })
-      .lean();
+    // Filter to videos only from the last 24 hours
+    const now = Date.now();
+    const videos = (response.data.results || []).filter(v => 
+      new Date(v.add_date).getTime() > now - 24 * 60 * 60 * 1000
+    );
 
-    // 3) Enrich with expiresAt
-    const videos = approvedVideos.map(v => ({
-      ...v,
-      expiresAt: new Date(v.createdAt.getTime() + 24 * 60 * 60 * 1000)
-    }));
-
-    // 4) Render feed.ejs
     return res.render('feed', { videos });
 
   } catch (err) {
-    console.error('❌ Error loading feed:', err);
+    console.error('❌ Error loading feed:', err?.response?.data || err);
     return res.status(500).send('Server error loading feed.');
   }
 });
 
 module.exports = router;
+
