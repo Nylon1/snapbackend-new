@@ -25,7 +25,10 @@ const uploadRoute = require('./routes/upload');
 const corsOptions = {
   origin: [
     'https://snap-news-admin-panel-1234.onrender.com',
-    'https://snap-news.onrender.com'
+    'https://snap-news.onrender.com',
+    'https://snapshnap.com',
+  'https://www.snapshnap.com',
+    
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
