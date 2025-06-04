@@ -95,3 +95,4 @@ app.post("/upload", upload.single("video"), async (req, res) => {
 app.listen(3001, () => {
   console.log("Upload proxy server running on http://localhost:3001");
 });
+module.exports = getMediaCMSToken;
