@@ -3,7 +3,7 @@ const multer = require("multer");
 const axios = require("axios");
 const fs = require("fs");
 const FormData = require("form-data");
-const getMediaCMSToken = require("./mediacmsToken"); // <-- use your helper
+
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
