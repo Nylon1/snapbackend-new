@@ -43,7 +43,7 @@ app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
 
-app.use('/api/mediacms-token', mediacmsTokenRoute);
+
 app.use('/', uploadRoute);
 
 // Parse JSON bodies and URL-encoded form data
