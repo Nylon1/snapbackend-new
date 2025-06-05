@@ -10,12 +10,12 @@ router.get('/', async (req, res) => {
   if (!videoIds.length) return res.status(400).json({ message: 'Missing videoIds' });
 
   const votes = await Vote.aggregate([
-    { $match: { videoId: { $in: videoIds } } },
+    { $match: { videoId: { $in: videoId } } },
     { $group: { _id: { videoId: '$videoId', voteType: '$voteType' }, count: { $sum: 1 } } }
   ]);
 
   const result = {};
-  videoIds.forEach(id => result[id] = { verified: 0, fake: 0, satire: 0, context: 0 });
+  videoId.forEach(id => result[id] = { verified: 0, fake: 0, satire: 0, context: 0 });
   votes.forEach(v => {
     const { videoId, voteType } = v._id;
     result[videoId][voteType] = v.count;
