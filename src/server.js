@@ -46,7 +46,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
-
+app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/votes', voteRoutes);
 app.use('/', uploadRoute);
 
@@ -113,7 +113,7 @@ app.get('/cookie-test', (req, res) => {
 });
 
 // 3️⃣ Static assets
-app.use(express.static(path.join(__dirname, '../public')));
+
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // 4️⃣ Health check
