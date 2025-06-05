@@ -6,8 +6,9 @@ const router = express.Router();
 const hashIP = (ip) => crypto.createHash('sha256').update(ip).digest('hex');
 
 router.get('/', async (req, res) => {
-  const videoId = req.query.videoIds?.split(',') || [];
-  if (!videoIds.length) return res.status(400).json({ message: 'Missing videoIds' });
+ const videoIds = req.query.videoIds?.split(',') || [];
+if (!videoIds.length) return res.status(400).json({ message: 'Missing videoIds' });
+
 
   const votes = await Vote.aggregate([
     { $match: { videoId: { $in: videoId } } },
