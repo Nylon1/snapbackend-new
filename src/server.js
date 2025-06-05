@@ -46,7 +46,7 @@ app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
 
-
+app.use('/api/votes', voteRoutes);
 app.use('/', uploadRoute);
 
 // Parse JSON bodies and URL-encoded form data
