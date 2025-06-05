@@ -19,6 +19,8 @@ const adminController         = require('./controllers/adminController');
 const app = express();
 const mediacmsTokenRoute = require('./routes/mediacmsToken');
 const uploadRoute = require('./routes/upload');
+const voteRoutes = require('./routes/voteRoutes');
+
 
 
 // Global CORS
@@ -49,7 +51,7 @@ app.use('/', uploadRoute);
 // Parse JSON bodies and URL-encoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use('/api/votes', voteRoutes);
 
 // 0️⃣ Connect to MongoDB
 mongoose
