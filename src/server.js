@@ -20,6 +20,7 @@ const app = express();
 const mediacmsTokenRoute = require('./routes/mediacmsToken');
 const uploadRoute = require('./routes/upload');
 const Vote = require('./models/Vote'); // if routes/ and models/ are siblings
+const voteRoutes = require('./routes/voteRoutes');
 
 
 
