@@ -19,7 +19,8 @@ const adminController         = require('./controllers/adminController');
 const app = express();
 const mediacmsTokenRoute = require('./routes/mediacmsToken');
 const uploadRoute = require('./routes/upload');
-const voteRoutes = require('./routes/voteRoutes');
+const Vote = require('../models/Vote'); // if routes/ and models/ are siblings
+
 
 
 
