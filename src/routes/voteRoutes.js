@@ -24,16 +24,25 @@ router.get('/', async (req, res) => {
   res.json(result);
 });
 
-router.get('/:videoId', async (req, res) => {
-  const videoId = req.params.videoId;
+router.get('/', async (req, res) => {
+  const videoIds = req.query.videoIds?.split(',') || []; // ✅ corrected
+  if (!videoIds.length) return res.status(400).json({ message: 'Missing videoIds' });
+
   const votes = await Vote.aggregate([
-    { $match: { videoId } },
-    { $group: { _id: '$voteType', count: { $sum: 1 } } }
+    { $match: { videoId: { $in: videoIds } } },
+    { $group: { _id: { videoId: '$videoId', voteType: '$voteType' }, count: { $sum: 1 } } }
   ]);
-  const result = { verified: 0, fake: 0, satire: 0, context: 0 };
-  votes.forEach(v => result[v._id] = v.count);
+
+  const result = {};
+  videoIds.forEach(id => result[id] = { verified: 0, fake: 0, satire: 0, context: 0 });
+  votes.forEach(v => {
+    const { videoId, voteType } = v._id;
+    result[videoId][voteType] = v.count;
+  });
+
   res.json(result);
 });
+
 
 router.post('/', async (req, res) => {
   const { videoId, voteType } = req.body;
