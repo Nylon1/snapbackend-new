@@ -47,7 +47,7 @@ app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
 app.use(express.static(path.join(__dirname, '../public')));
-app.use('/api/votes', voteRoutes);
+
 app.use('/', uploadRoute);
 
 // Parse JSON bodies and URL-encoded form data
