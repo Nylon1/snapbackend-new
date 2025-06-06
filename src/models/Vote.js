@@ -1,27 +1,39 @@
+// models/Vote.js
 const mongoose = require('mongoose');
 
-const voteSchema = new mongoose.Schema({
-  videoId: {
-    type: String,
-    required: true,
-    index: true
+const VideoVoteSchema = new mongoose.Schema(
+  {
+    videoId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    verified: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    fake: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    satire: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    context: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
-  voteType: {
-    type: String,
-    enum: ['verified', 'fake', 'satire', 'context'],
-    required: true
-  },
-  ipHash: {
-    type: String,
-    required: true,
-    index: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    expires: 60 * 60 * 24  // Optional: auto-delete after 24 hours
+  {
+    timestamps: true,
   }
-});
+);
 
-module.exports = mongoose.model('Vote', voteSchema);
-
+// If a document for this videoId doesn’t exist yet, we’ll create it when first voting
+module.exports = mongoose.model('VideoVote', VideoVoteSchema);
