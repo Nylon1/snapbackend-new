@@ -55,6 +55,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/votes', voteRoutes);
 
+app.get('/routes', (req, res) => {
+  const routes = app._router.stack
+    .filter(layer => layer.route)
+    .map(layer => ({
+      path: layer.route.path,
+      methods: Object.keys(layer.route.methods).map(m => m.toUpperCase())
+    }));
+  res.json(routes);
+});
+
 // 0️⃣ Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
