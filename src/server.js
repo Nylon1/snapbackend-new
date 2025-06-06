@@ -47,13 +47,13 @@ app.options('*', cors(corsOptions));
 
 // Explicit CORS + auth for pending-content
 app.use(express.static(path.join(__dirname, '../public')));
-
+app.use('/api/votes', voteRoutes);
 app.use('/', uploadRoute);
 
 // Parse JSON bodies and URL-encoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api/votes', voteRoutes);
+
 
 app.get('/routes', (req, res) => {
   const routes = app._router.stack
