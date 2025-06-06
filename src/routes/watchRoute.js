@@ -17,11 +17,11 @@ router.get('/:token', async (req, res) => {
       return res.status(404).render('404', { message: 'Snap not found' });
     }
 
-    res.render('watch', {
-      filename: token,
-      videoPath: video.file, // or whatever field is correct
+  res.render('watch', {
+      videoId: token,            // ← so watch.ejs’s data-videoid="<%= videoId %>" works
+      videoPath: video.file,
       previewImage: video.thumbnail_url,
-      video // pass the whole video object if you want
+      video                     // the same `video` object your template uses
     });
 
   } catch (error) {
