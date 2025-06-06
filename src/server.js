@@ -44,15 +44,15 @@ const corsOptions = {
 // MUST be before all routes and sessions!
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-
+// Parse JSON bodies and URL-encoded form data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Explicit CORS + auth for pending-content
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/votes', voteRoutes);
 app.use('/', uploadRoute);
 
-// Parse JSON bodies and URL-encoded form data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 
 
 app.get('/routes', (req, res) => {
